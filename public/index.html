@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Számlák</h1>
+    <div class="header-container">
+        <button onclick="openModal()" class="addBillButton">Új Számla</button>
+    </div>
+    
+    <div id="listOfBills" class="bill-container"></div>
+
+    <!-- Új Számla Modal -->
+    <div id="billModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Új Számla</h2>
+            <form id="billForm">
+                <label>Kiállító:</label>
+                <select id="sellerSelect" required></select><br><br>
+
+                <label>Vevő:</label>
+                <select id="customerSelect" required></select><br><br>
+
+                <label>Számlaszám:</label>
+                <input type="text" id="billNumber" required><br><br>
+
+                <label>Kelte:</label>
+                <input type="date" id="creationDate" required><br><br>
+
+                <label>Befizetés napja:</label>
+                <input type="date" id="dateOfCompletion" required><br><br>
+
+                <label>Határidő:</label>
+                <input type="date" id="paymentDeadline" required><br><br>
+
+                <label>Végösszeg (Ft):</label>
+                <input type="number" id="totalAmount" required><br><br>
+
+                <button type="submit">Mentés</button>
+                <button type="button" onclick="closeModal()">Mégse</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Számla Modósítása-->
+    <div id="editModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Számla szerkesztése</h2>
+        <form id="editBillForm">
+            <label>Számlaszám:</label>
+            <input type="text" id="editBillNumber" required pattern="\d{8}-\d{8}-\d{8}"><br><br>
+
+            <label>Teljesítés dátuma:</label>
+            <input type="date" id="editDateOfCompletion" required><br><br>
+
+            <label>Határidő:</label>
+            <input type="date" id="editPaymentDeadline" required><br><br>
+
+            <label>Végösszeg (Ft):</label>
+            <input type="number" id="editTotalAmount" required><br><br>
+
+            <button type="submit">Mentés</button>
+            <button type="button" id="cancelEdit">Mégse</button>
+        </form>
+    </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

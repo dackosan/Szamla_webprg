@@ -9,34 +9,34 @@ app.use(express.json());
 app.use(cors());
 
 //buyer
-app.get('/buyers', (req,res) =>{
+app.get('/sellers', (req,res) =>{
     try {
-        const buyers = db.getBuyers();
-        res.status(200).json(buyers);
+        const sellers = db.getSellers();
+        res.status(200).json(sellers);
     }
     catch (err) {
         res.status(500).json({ message: `${err}` });
     }
 });
-app.post("/buyers", (req, res) => {
+app.post("/sellers", (req, res) => {
     try {
         const { name, address, taxNumber } = req.body;
         if (!name || !address || !taxNumber) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
 
-        const savedBuyer = db.saveBuyer(name, address, taxNumber);
-        if (savedBuyer.changes != 1) {
-            return res.status(501).json({ message: "Buyer save falied" });
+        const savedSeller = db.saveSeller(name, address, taxNumber);
+        if (savedSeller.changes != 1) {
+            return res.status(501).json({ message: "Seller save falied" });
         }
 
-        res.status(201).json({ id: savedBuyer.lastInsertRowid, name, address, taxNumber });
+        res.status(201).json({ id: savedSeller.lastInsertRowid, name, address, taxNumber });
     }
     catch (err) {
         res.status(500).json({ message: `${err}` });
     }
 });
-app.put("/buyers/:id", (req, res) => {
+app.put("/sellers/:id", (req, res) => {
     try {
         const { name, address, taxNumber } = req.body;
         if (!name || !address || !taxNumber) {
@@ -44,9 +44,9 @@ app.put("/buyers/:id", (req, res) => {
         }
 
         const id = +req.params.id;
-        const updatedBuyer = db.updateBuyer(id, name, address, taxNumber);
-        if (updatedBuyer.changes != 1) {
-            return res.status(501).json({ message: "Buyer update falied" });
+        const updatedSeller = db.updateSeller(id, name, address, taxNumber);
+        if (updatedSeller.changes != 1) {
+            return res.status(501).json({ message: "Seller update falied" });
         }
 
         res.status(200).json({ id, name, address, taxNumber });
@@ -55,12 +55,12 @@ app.put("/buyers/:id", (req, res) => {
         res.status(500).json({ message: `${err}` });
     }
 });
-app.delete("/buyers/:id", (req, res) => {
+app.delete("/sellers/:id", (req, res) => {
     try {
         const id = +req.params.id;
-        const deletedBuyer = db.deleteBuyer(id);
-        if (deletedBuyer.changes != 1) {
-            return res.status(501).json({ message: "Buyer delete falied" });
+        const deletedSeller = db.deleteSeller(id);
+        if (deletedSeller.changes != 1) {
+            return res.status(501).json({ message: "Seller delete falied" });
         }
 
         res.status(200).json({ message: "Delete succesful" });
@@ -145,7 +145,7 @@ app.get("/bills", (req, res) => {
 app.post("/bills", (req, res) => {
     try {
         const { sellerId, customerId, billNumber, creationDate, dateOfCompletion, paymentDeadline, totalAmount, amountOfVat } = req.body;
-        if (!sellerId || !customerId || !billNumber || !creationDate || !dateOfCompletion || !paymentDeadline || !total || !amountOfVat) {
+        if (!sellerId || !customerId || !billNumber || !creationDate || !dateOfCompletion || !paymentDeadline || !totalAmount || !amountOfVat) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
         const savedBill = db.saveBill(sellerId, customerId, billNumber, creationDate, dateOfCompletion, paymentDeadline, totalAmount, amountOfVat);
@@ -162,7 +162,7 @@ app.post("/bills", (req, res) => {
 app.put("/bills/:id", (req, res) => {
     try {
         const { sellerId, customerId, billNumber, creationDate, dateOfCompletion, paymentDeadline, totalAmount, amountOfVat } = req.body;
-        if (!sellerId || !customerId || !billNumber || !creationDate || !dateOfCompletion || !paymentDeadline || !total || !amountOfVat) {
+        if (!sellerId || !customerId || !billNumber || !creationDate || !dateOfCompletion || !paymentDeadline || !totalAmount || !amountOfVat) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
         const id = +req.params.id;
@@ -175,7 +175,7 @@ app.put("/bills/:id", (req, res) => {
     catch (err) {
         res.status(500).json({ message: `${err}` });
     }
-})
+});
 app.delete("/bills/:id", (req, res) => {
     try {
         const id = +req.params.id;
@@ -188,7 +188,7 @@ app.delete("/bills/:id", (req, res) => {
     catch (err) {
         res.status(500).json({ message: `${err}` });
     }
-})
+});
 
 app.listen(PORT, () =>{
     console.log(`Server runs on ${PORT}`);
