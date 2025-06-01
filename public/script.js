@@ -75,6 +75,7 @@ const customerSelect = document.getElementById("customerSelect");
 const billNumberPattern = /^\d{8}-\d{8}-\d{8}$/;
 
 function openModal() {
+    loadSelectOptions();
     modal.classList.remove("hidden");
 
     const today = new Date();
@@ -137,8 +138,8 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 function editBill(bill) {
-    currentEditBill = bill;  // egész objektum
-    currentEditBillId = bill.id; // opcionális, ha kell az id külön is
+    currentEditBill = bill;
+    currentEditBillId = bill.id;
 
     const editModal = document.getElementById("editModal");
     editModal.classList.remove("hidden");
@@ -175,7 +176,7 @@ document.getElementById("editBillForm").addEventListener("submit", async (e) => 
         sellerId,
         customerId,
         billNumber,
-        creationDate: currentEditBill.creationDate, // ha szerkesztéskor ez nem változik
+        creationDate: currentEditBill.creationDate,
         dateOfCompletion,
         paymentDeadline,
         totalAmount,
@@ -206,6 +207,8 @@ document.getElementById("cancelEdit").addEventListener("click", () => {
     document.getElementById("editModal").classList.add("hidden");
 });
 
+
+//ember hozzáadása
 function openAddPersonModal() {
     document.getElementById("personModal").classList.remove("hidden");
 }
@@ -262,6 +265,7 @@ document.getElementById("newPerson").addEventListener("submit", async (e) => {
     }
 });
 
+//ember módosítása
 async function openEditPersonModal() {
     document.getElementById("editPersonModal").classList.remove("hidden");
 
@@ -271,7 +275,6 @@ async function openEditPersonModal() {
     const customers = await fetch("http://localhost:3000/customers").then(res => res.json());
     const sellers = await fetch("http://localhost:3000/sellers").then(res => res.json());
 
-    // Mindkettőt hozzáadjuk a dropdownhoz
     customers.forEach(c => {
         const opt = document.createElement("option");
         opt.value = `customer-${c.id}`;
@@ -287,13 +290,11 @@ async function openEditPersonModal() {
     });
 }
 
-// bezárás + reset
 function closeEditPersonModal() {
     document.getElementById("editPersonModal").classList.add("hidden");
     document.getElementById("editPersonForm").reset();
 }
 
-// ha választunk valakit, automatikusan kitölti a mezőket
 document.getElementById("editPersonSelect").addEventListener("change", async function () {
     const value = this.value;
     if (!value) return;
@@ -306,7 +307,6 @@ document.getElementById("editPersonSelect").addEventListener("change", async fun
     document.getElementById("editPersonTaxnumber").value = person.taxNumber;
 });
 
-// submit mentéshez
 document.getElementById("editPersonForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
@@ -371,7 +371,6 @@ function closeDeletePersonModal() {
     document.getElementById("deletePersonForm").reset();
 }
 
-// Submit esemény a törlésre
 document.getElementById("deletePersonForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
@@ -390,7 +389,7 @@ document.getElementById("deletePersonForm").addEventListener("submit", async fun
     if (response.ok) {
         alert("Sikeres törlés!");
         closeDeletePersonModal();
-        fetchAll(); // ha van ilyen függvényed, frissíti a listát
+        fetchAll();
     } else {
         alert("Sikertelen törlés.");
     }
