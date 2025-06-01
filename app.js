@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-//buyer
+//seller
 app.get('/sellers', (req,res) =>{
     try {
         const sellers = db.getSellers();
@@ -17,6 +17,16 @@ app.get('/sellers', (req,res) =>{
     catch (err) {
         res.status(500).json({ message: `${err}` });
     }
+});
+app.get("/sellers/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    const seller = db.getSellerById(id);
+
+    if (!seller) {
+        return res.status(404).json({ message: "Seller not found" });
+    }
+
+    res.json(seller);
 });
 app.post("/sellers", (req, res) => {
     try {
@@ -79,6 +89,16 @@ app.get('/customers', (req,res) =>{
     catch (err) {
         res.status(500).json({ message: `${err}` });
     }
+});
+app.get("/customers/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    const customer = db.getCustomerById(id);
+
+    if (!customer) {
+        return res.status(404).json({ message: "Customer not found" });
+    }
+
+    res.json(customer);
 });
 app.post("/customers", (req, res) => {
     try {

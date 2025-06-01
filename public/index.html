@@ -9,6 +9,9 @@
 <body>
     <h1>Számlák</h1>
     <div class="header-container">
+        <button onclick="openAddPersonModal()" class="addBillButton">Új Ember</button>
+        <button onclick="openEditPersonModal()" class="addBillButton">Ember Módosítása</button>
+        <button onclick="openDeletePersonModal()" class="addBillButton">Ember Törlése</button>
         <button onclick="openModal()" class="addBillButton">Új Számla</button>
     </div>
     
@@ -48,25 +51,85 @@
 
     <!-- Számla Modósítása-->
     <div id="editModal" class="modal hidden">
-    <div class="modal-content">
-        <h2>Számla szerkesztése</h2>
-        <form id="editBillForm">
-            <label>Számlaszám:</label>
-            <input type="text" id="editBillNumber" required pattern="\d{8}-\d{8}-\d{8}"><br><br>
+        <div class="modal-content">
+            <h2>Számla szerkesztése</h2>
+            <form id="editBillForm">
+                <label>Számlaszám:</label>
+                <input type="text" id="editBillNumber" required pattern="\d{8}-\d{8}-\d{8}"><br><br>
 
-            <label>Teljesítés dátuma:</label>
-            <input type="date" id="editDateOfCompletion" required><br><br>
+                <label>Teljesítés dátuma:</label>
+                <input type="date" id="editDateOfCompletion" required><br><br>
 
-            <label>Határidő:</label>
-            <input type="date" id="editPaymentDeadline" required><br><br>
+                <label>Határidő:</label>
+                <input type="date" id="editPaymentDeadline" required><br><br>
 
-            <label>Végösszeg (Ft):</label>
-            <input type="number" id="editTotalAmount" required><br><br>
+                <label>Végösszeg (Ft):</label>
+                <input type="number" id="editTotalAmount" required><br><br>
 
-            <button type="submit">Mentés</button>
-            <button type="button" id="cancelEdit">Mégse</button>
-        </form>
+                <button type="submit">Mentés</button>
+                <button type="button" id="cancelEdit">Mégse</button>
+            </form>
+        </div>
     </div>
+
+    <!-- Ember Hozzáadása -->
+    <div id="personModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Számla szerkesztése</h2>
+            <form id="newPerson">
+                <select id="personType" required>
+                    <option value="customer">Vevő</option>
+                    <option value="seller">Kiállító</option>
+                </select><br><br>
+
+                <label>Név:</label>
+                <input type="text" id="newPersonName" required ><br><br>
+
+                <label>Cím:</label>
+                <input type="text" id="newPersonAddress" required ><br><br>
+
+                <label>Adószám:</label>
+                <input type="text" id="newPersonTaxnumber" required ><br><br>
+
+                <button type="submit">Mentés</button>
+                <button type="button" id="cancelAddPerson">Mégse</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="editPersonModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Ember módosítása</h2>
+            <form id="editPersonForm">
+                <label>Válassz személyt:</label>
+                <select id="editPersonSelect" required></select><br><br>
+
+                <label>Név:</label>
+                <input type="text" id="editPersonName" required><br><br>
+
+                <label>Cím:</label>
+                <input type="text" id="editPersonAddress" required><br><br>
+
+                <label>Adószám:</label>
+                <input type="text" id="editPersonTaxnumber" required><br><br>
+
+                <button type="submit">Mentés</button>
+                <button type="button" onclick="closeEditPersonModal()">Mégse</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="deletePersonModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Ember törlése</h2>
+            <form id="deletePersonForm">
+            <label>Válassz személyt:</label>
+            <select id="deletePersonSelect" required></select><br><br>
+
+            <button type="submit">Törlés</button>
+            <button type="button" onclick="closeDeletePersonModal()">Mégse</button>
+            </form>
+        </div>
     </div>
 
     <script src="script.js"></script>

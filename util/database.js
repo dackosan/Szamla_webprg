@@ -17,12 +17,14 @@ db.prepare(`CREATE TABLE IF NOT EXISTS bills (id INTEGER PRIMARY KEY AUTOINCREME
                                                 FOREIGN KEY(customerId) REFERENCES customers(id) ON DELETE CASCADE)`).run();
 
 export const getSellers = () => db.prepare('SELECT * FROM sellers').all();
+export const getSellerById = (id) => db.prepare('SELECT * FROM sellers WHERE id = ?').get(id);
 export const saveSeller = (name, address, taxNumber) => db.prepare('INSERT INTO sellers (name, address, taxNumber) VALUES (?,?,?)').run(name, address, taxNumber);
 export const updateSeller = (id, name, address, taxNumber) => db.prepare('UPDATE sellers SET name = ?, address = ?, taxNumber = ? WHERE id = ?').run(name, address, taxNumber, id);
 export const deleteSeller = (id) => db.prepare('DELETE FROM sellers WHERE id =?').run(id);
 //export const getSellerTaxNumbers = () => db.prepare('SELECT taxNumber FROM sellers').all();
 
 export const getCustomers = () => db.prepare('SELECT * FROM customers').all();
+export const getCustomerById = (id) => db.prepare('SELECT * FROM customers WHERE id = ?').get(id);
 export const saveCustomer = (name, address, taxNumber) => db.prepare('INSERT INTO customers (name, address, taxNumber) VALUES (?,?,?)').run(name, address, taxNumber);
 export const updateCustomer = (id, name, address, taxNumber) => db.prepare('UPDATE customers SET name = ?, address = ?, taxNumber = ? WHERE id = ?').run(name, address, taxNumber, id);
 export const deleteCustomer = (id) => db.prepare('DELETE FROM customers WHERE id =?').run(id);

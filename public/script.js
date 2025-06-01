@@ -205,3 +205,193 @@ document.getElementById("editBillForm").addEventListener("submit", async (e) => 
 document.getElementById("cancelEdit").addEventListener("click", () => {
     document.getElementById("editModal").classList.add("hidden");
 });
+
+function openAddPersonModal() {
+    document.getElementById("personModal").classList.remove("hidden");
+}
+
+function closePersonModal() {
+    document.getElementById("personModal").classList.add("hidden");
+    document.getElementById("newPerson").reset();
+}
+
+
+document.getElementById("cancelAddPerson").addEventListener("click", () => {
+    document.getElementById("personModal").classList.add("hidden");
+    document.getElementById("newPerson").reset();
+});
+
+document.getElementById("newPerson").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const type = document.getElementById("personType").value;
+    const name = document.getElementById("newPersonName").value.trim();
+    const address = document.getElementById("newPersonAddress").value.trim();
+    const taxNumber = document.getElementById("newPersonTaxnumber").value.trim();
+
+    const taxNumberPattern = /^\d{8}-\d{1}-\d{2}$/;
+    if (!taxNumberPattern.test(taxNumber)) {
+        alert("Hibás adószám formátum! Pl.: 12345678-1-12");
+        return;
+    }
+
+    const newPerson = { name, address, taxNumber };
+    const endpoint = type === "customer" ? "customers" : "sellers";
+
+    try {
+        const response = await fetch(`http://localhost:3000/${endpoint}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newPerson)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Hiba: ${errorData.message}`);
+            return;
+        }
+
+        const data = await response.json();
+        alert(`${type === "customer" ? "Vevő" : "Kiállító"} hozzáadva (ID: ${data.id})`);
+
+        closePersonModal();
+        fetchAll();
+    } catch (err) {
+        console.error(err);
+        alert("Hálózati vagy szerverhiba.");
+    }
+});
+
+async function openEditPersonModal() {
+    document.getElementById("editPersonModal").classList.remove("hidden");
+
+    const select = document.getElementById("editPersonSelect");
+    select.innerHTML = '<option value="">Válassz...</option>';
+
+    const customers = await fetch("http://localhost:3000/customers").then(res => res.json());
+    const sellers = await fetch("http://localhost:3000/sellers").then(res => res.json());
+
+    // Mindkettőt hozzáadjuk a dropdownhoz
+    customers.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = `customer-${c.id}`;
+        opt.textContent = `Vevő: ${c.name}`;
+        select.appendChild(opt);
+    });
+
+    sellers.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = `seller-${s.id}`;
+        opt.textContent = `Kiállító: ${s.name}`;
+        select.appendChild(opt);
+    });
+}
+
+// bezárás + reset
+function closeEditPersonModal() {
+    document.getElementById("editPersonModal").classList.add("hidden");
+    document.getElementById("editPersonForm").reset();
+}
+
+// ha választunk valakit, automatikusan kitölti a mezőket
+document.getElementById("editPersonSelect").addEventListener("change", async function () {
+    const value = this.value;
+    if (!value) return;
+
+    const [type, id] = value.split("-");
+    const person = await fetch(`http://localhost:3000/${type}s/${id}`).then(res => res.json());
+
+    document.getElementById("editPersonName").value = person.name;
+    document.getElementById("editPersonAddress").value = person.address;
+    document.getElementById("editPersonTaxnumber").value = person.taxNumber;
+});
+
+// submit mentéshez
+document.getElementById("editPersonForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const selected = document.getElementById("editPersonSelect").value;
+    if (!selected) return alert("Nincs kiválasztva személy.");
+
+    const [type, id] = selected.split("-");
+    const name = document.getElementById("editPersonName").value.trim();
+    const address = document.getElementById("editPersonAddress").value.trim();
+    const taxNumber = document.getElementById("editPersonTaxnumber").value.trim();
+
+    const taxNumberPattern = /^\d{8}-\d{1}-\d{2}$/;
+    if (!taxNumberPattern.test(taxNumber)) {
+        alert("Hibás adószám formátum! Pl.: 12345678-1-12");
+        return;
+    }
+
+    const updatedPerson = { name, address, taxNumber };
+
+    const response = await fetch(`http://localhost:3000/${type}s/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedPerson)
+    });
+
+    if (response.ok) {
+        alert("Sikeres módosítás!");
+        closeEditPersonModal();
+        fetchAll();
+    } else {
+        alert("Sikertelen módosítás.");
+    }
+});
+
+//ember törlés
+async function openDeletePersonModal() {
+    document.getElementById("deletePersonModal").classList.remove("hidden");
+
+    const select = document.getElementById("deletePersonSelect");
+    select.innerHTML = '<option value="">Válassz...</option>';
+
+    const customers = await fetch("http://localhost:3000/customers").then(res => res.json());
+    const sellers = await fetch("http://localhost:3000/sellers").then(res => res.json());
+
+    customers.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = `customer-${c.id}`;
+        opt.textContent = `Vevő: ${c.name}`;
+        select.appendChild(opt);
+    });
+
+    sellers.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = `seller-${s.id}`;
+        opt.textContent = `Kiállító: ${s.name}`;
+        select.appendChild(opt);
+    });
+}
+
+function closeDeletePersonModal() {
+    document.getElementById("deletePersonModal").classList.add("hidden");
+    document.getElementById("deletePersonForm").reset();
+}
+
+// Submit esemény a törlésre
+document.getElementById("deletePersonForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const selected = document.getElementById("deletePersonSelect").value;
+    if (!selected) return alert("Nincs kiválasztva személy!");
+
+    const [type, id] = selected.split("-");
+
+    const confirmed = confirm("Biztosan törölni szeretnéd ezt a személyt?");
+    if (!confirmed) return;
+
+    const response = await fetch(`http://localhost:3000/${type}s/${id}`, {
+        method: "DELETE"
+    });
+
+    if (response.ok) {
+        alert("Sikeres törlés!");
+        closeDeletePersonModal();
+        fetchAll(); // ha van ilyen függvényed, frissíti a listát
+    } else {
+        alert("Sikertelen törlés.");
+    }
+});
