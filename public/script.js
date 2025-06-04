@@ -24,18 +24,22 @@ function renderBills(bills, sellers, customers) {
         const seller = sellers.find(s => s.id === bill.sellerId);
         const customer = customers.find(c => c.id === bill.customerId);
 
-        const vatAmount = Math.round(bill.totalAmount * 0.27);
+        const netAmount = bill.totalAmount;
+        const vatPercent = 27;
+        const vatAmount = netAmount * vatPercent / 100;
+        const grossAmount = netAmount + vatAmount;
 
         const div = document.createElement("div");
         div.classList.add("bill-card");
 
         div.innerHTML = `
-            <p><strong>Kiállító:</strong> ${seller?.name ?? "Ismeretlen"}</p>
-            <p><strong>Vevő:</strong> ${customer?.name ?? "Ismeretlen"}</p>
+            <p><strong>Számlaszám: ${bill.billNumber}</strong></p>
+            <p><strong>Kiállító:</strong> ${seller?.name ?? "Ismeretlen"} || <strong>Vevő:</strong> ${customer?.name ?? "Ismeretlen"}</p>
             <p><strong>Kelte:</strong> ${bill.creationDate}</p>
             <p><strong>Határidő:</strong> ${bill.paymentDeadline}</p>
-            <p><strong>Végösszeg:</strong> ${bill.totalAmount} Ft</p>
-            <p><strong>ÁFA (27%):</strong> ${vatAmount} Ft</p>
+            <p><strong>Nettó Összeg:</strong> ${netAmount} Ft</p>
+            <p><strong>ÁFA:</strong> ${vatAmount} Ft</p>
+            <p><strong>Bruttó Összeg:</strong> ${grossAmount} Ft</p>
             <button class="edit-btn">✏️</button>
             <button class="delete-btn">🗑️</button>
         `;
@@ -80,10 +84,11 @@ function openModal() {
 
     const today = new Date();
     const formattedToday = today.toISOString().split('T')[0];
+    const oneWeeksLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const twoWeeksLater = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     document.getElementById("creationDate").value = formattedToday;
-    document.getElementById("dateOfCompletion").value = formattedToday;
+    document.getElementById("dateOfCompletion").value = oneWeeksLater;
     document.getElementById("paymentDeadline").value = twoWeeksLater;
 }
 
@@ -109,6 +114,20 @@ form.addEventListener("submit", async (e) => {
 
     if (!billNumberPattern.test(billNumber)) {
         alert("A számlaszám formátuma hibás! Használj ilyen formátumot: 12345678-12345678-12345678");
+        return;
+    }
+
+    const creationDateStr = document.getElementById("creationDate").value;
+    const paymentDeadlineStr = document.getElementById("paymentDeadline").value;
+
+    const creationDate = new Date(creationDateStr);
+    const paymentDeadline = new Date(paymentDeadlineStr);
+
+    const maxDeadline = new Date(creationDate);
+    maxDeadline.setDate(maxDeadline.getDate() + 30);
+
+    if (paymentDeadline > maxDeadline) {
+        alert("A fizetési határidő nem lehet több, mint a kiállítás dátuma + 30 nap!");
         return;
     }
 
@@ -254,9 +273,6 @@ document.getElementById("newPerson").addEventListener("submit", async (e) => {
             return;
         }
 
-        const data = await response.json();
-        alert(`${type === "customer" ? "Vevő" : "Kiállító"} hozzáadva (ID: ${data.id})`);
-
         closePersonModal();
         fetchAll();
     } catch (err) {
@@ -326,18 +342,24 @@ document.getElementById("editPersonForm").addEventListener("submit", async funct
 
     const updatedPerson = { name, address, taxNumber };
 
-    const response = await fetch(`http://localhost:3000/${type}s/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedPerson)
-    });
+    try {
+        const response = await fetch(`http://localhost:3000/${type}s/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedPerson)
+        });
 
-    if (response.ok) {
-        alert("Sikeres módosítás!");
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Hiba: ${errorData.message}`);
+            return;
+        }
+
         closeEditPersonModal();
         fetchAll();
-    } else {
-        alert("Sikertelen módosítás.");
+    } catch (err) {
+        console.error(err);
+        alert("Hálózati vagy szerverhiba.");
     }
 });
 
@@ -382,15 +404,21 @@ document.getElementById("deletePersonForm").addEventListener("submit", async fun
     const confirmed = confirm("Biztosan törölni szeretnéd ezt a személyt?");
     if (!confirmed) return;
 
-    const response = await fetch(`http://localhost:3000/${type}s/${id}`, {
-        method: "DELETE"
-    });
+    try {
+        const response = await fetch(`http://localhost:3000/${type}s/${id}`, {
+            method: "DELETE"
+        });
 
-    if (response.ok) {
-        alert("Sikeres törlés!");
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Hiba: ${errorData.message}`);
+            return;
+        }
+
         closeDeletePersonModal();
         fetchAll();
-    } else {
-        alert("Sikertelen törlés.");
+    } catch (err) {
+        console.error(err);
+        alert("Hálózati vagy szerverhiba.");
     }
 });
